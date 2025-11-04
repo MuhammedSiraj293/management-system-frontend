@@ -1,0 +1,20 @@
+/*
+ * This file imports the three main layers of Tailwind CSS.
+ * Vite will process this file and replace these directives
+ * with the full, generated Tailwind stylesheet.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * You can add any custom, global base styles here.
+ * For example, setting a default background color
+ * or font for the entire app.
+ */
+body {
+  @apply bg-gray-100 text-gray-900;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
