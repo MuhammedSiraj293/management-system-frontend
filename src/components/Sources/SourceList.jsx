@@ -1,17 +1,26 @@
-import React, { useState } from 'react';
-import { formatDate } from '../../utils/formatDate.js';
+import React, { useState } from "react";
+import { formatDate } from "../../utils/formatDate.js";
+import SourceEditModal from "./SourceEditModal.jsx";
 
 /**
  * A component to display a single source item in the list.
- * This will also contain the logic for editing/deleting.
- * (We can expand this later with an "Edit" modal).
+ * It now manages the state for the edit modal and shows the full webhook URL.
  *
  * @param {object} props
  * @param {object} props.source - The source object.
  * @param {Function} props.onDelete - Function to call when deleting.
+ * @param {Function} props.onUpdate - Function to call when updating.
  */
-const SourceItem = ({ source, onDelete }) => {
+const SourceItem = ({ source, onDelete, onUpdate }) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // --- ADDED: Get the API URL from environment variables ---
+  // VITE_API_BASE_URL is 'https://your-api.onrender.com/api'
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  // --- UPDATED: Construct the full URL ---
+  const fullWebhookUrl = `${API_BASE_URL}/webhooks/${source.platform}?token=${source.identifierToken}`;
 
   const handleDelete = async () => {
     if (
@@ -24,86 +33,89 @@ const SourceItem = ({ source, onDelete }) => {
     setIsDeleting(true);
     try {
       await onDelete(source._id);
-      // No need to set isDeleting to false, as the component will unmount
     } catch (error) {
       alert(`Error deleting source: ${error.message}`);
       setIsDeleting(false);
     }
   };
 
-  // The unique webhook token for this source
-  const webhookToken = source.identifierToken;
-
   return (
-    <li className="flex flex-col rounded-md border border-gray-200 bg-white p-4 shadow-sm transition-shadow duration-150 hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex-1">
-        <div className="flex items-center space-x-2">
-          <span
-            className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-              source.platform === 'elementor'
-                ? 'bg-purple-100 text-purple-800'
-                : 'bg-blue-100 text-blue-800'
-            }`}
-          >
-            {source.platform}
-          </span>
-          <h3 className="text-lg font-semibold text-gray-900">{source.name}</h3>
-        </div>
-        <div className="mt-2 text-sm text-gray-600">
-          <p>
-            <strong>Leads:</strong> {source.leadCount || 0}
-          </p>
-          <p>
-            <strong>Sheet ID:</strong> {source.config?.sheetId || 'Not Set'}
-          </p>
-          <p>
-            <strong>Added:</strong> {formatDate(source.createdAt)}
-          </p>
-        </div>
+    <>
+      <SourceEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        source={source}
+        onUpdate={onUpdate}
+      />
 
-        {/* --- IMPORTANT: Webhook Token Display --- */}
-        
+      <li className="flex flex-col rounded-md border border-gray-200 bg-white p-4 shadow-sm transition-shadow duration-150 hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex-1">
+          <div className="flex items-center space-x-2">
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                source.platform === "elementor"
+                  ? "bg-purple-100 text-purple-800"
+                  : "bg-blue-100 text-blue-800"
+              }`}
+            >
+              {source.platform}
+            </span>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {source.name}
+            </h3>
+          </div>
+          <div className="mt-2 text-sm text-gray-600">
+            <p>
+              <strong>Leads:</strong> {source.leadCount || 0}
+            </p>
+            <p>
+              <strong>Sheet ID:</strong> {source.config?.sheetId || "Not Set"}
+            </p>
+            <p>
+              <strong>Added:</strong> {formatDate(source.createdAt)}
+            </p>
+          </div>
+
+          {/* --- THIS BLOCK IS UPDATED --- */}
           <div className="mt-3 rounded-md bg-gray-50 p-2">
-            <label className="block text-xs font-medium text-gray-500">
-              {source.platform} Webhook Token
+            <label className="block text-xs font-medium text-gray-500 capitalize">
+              {source.platform} Webhook URL
             </label>
             <input
               type="text"
               readOnly
-              value={webhookToken}
+              value={fullWebhookUrl} // Use the full URL
               className="mt-1 w-full rounded border-gray-300 bg-gray-100 p-1.5 text-xs text-gray-700 shadow-sm"
-              onFocus={(e) => e.target.select()}
+              onFocus={(e) => e.target.select()} // Select all on click
             />
           </div>
-        
-      </div>
+          {/* --- END UPDATE --- */}
+        </div>
 
-      <div className="mt-4 flex shrink-0 space-x-3 sm:mt-0 sm:ml-4">
-        {/* We'll add edit functionality later
-        <button className="text-sm font-medium text-blue-600 hover:text-blue-800">
-          Edit
-        </button>
-        <span className="text-gray-300">|</span>
-        */}
-        <button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="text-sm font-medium text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:text-gray-400"
-        >
-          {isDeleting ? 'Deleting...' : 'Delete'}
-        </button>
-      </div>
-    </li>
+        <div className="mt-4 flex shrink-0 space-x-3 sm:mt-0 sm:ml-4">
+          <button
+            onClick={() => setIsEditModalOpen(true)}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+          >
+            Edit
+          </button>
+          <span className="text-gray-300">|</span>
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="text-sm font-medium text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:text-gray-400"
+          >
+            {isDeleting ? "Deleting..." : "Delete"}
+          </button>
+        </div>
+      </li>
+    </>
   );
 };
 
 /**
  * Renders the list of configured lead sources.
- *
- * @param {object} props
- * @param {Array} props.sources - The array of source objects.
- * @param {Function} props.onUpdate - Function to call when editing.
- * @param {Function} props.onDelete - Function to call when deleting.
+ * (Passes 'onUpdate' down to each item)
  */
 const SourceList = ({ sources, onUpdate, onDelete }) => {
   if (!sources || sources.length === 0) {
@@ -121,7 +133,7 @@ const SourceList = ({ sources, onUpdate, onDelete }) => {
           key={source._id}
           source={source}
           onDelete={onDelete}
-          // onUpdate={onUpdate} // We'll add this later
+          onUpdate={onUpdate}
         />
       ))}
     </ul>

@@ -1,17 +1,17 @@
-import React from 'react';
-import SourceList from '../components/Sources/SourceList.jsx'; // We'll create this next
-import SourceForm from '../components/Sources/SourceForm.jsx'; // And this one
-import { useSources } from '../hooks/useSources.js';
-import Loader from '../components/Common/Loader.jsx';
-import Alert from '../components/Common/Alert.jsx';
+import React from "react";
+import SourceList from "../components/Sources/SourceList.jsx";
+import SourceForm from "../components/Sources/SourceForm.jsx";
+import { useSources } from "../hooks/useSources.js";
+import Loader from "../components/Common/Loader.jsx";
+import Alert from "../components/Common/Alert.jsx";
 
 /**
  * The "Sources" page.
- * This page now uses the useSources hook to manage state
- * and passes data/handlers to its child components.
+ * This page now passes the 'updateSource' function
+ * down to the SourceList component.
  */
 const Sources = () => {
-  // --- Use the hook to get data and handlers ---
+  // --- Get all functions from the hook ---
   const { sources, isLoading, error, addSource, updateSource, deleteSource } =
     useSources();
 
@@ -19,7 +19,6 @@ const Sources = () => {
     <div>
       <h1 className="mb-6 text-3xl font-bold text-gray-800">Lead Sources</h1>
 
-      {/* Show a global error message for the page */}
       {error && !isLoading && <Alert type="error" message={error} />}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -27,7 +26,6 @@ const Sources = () => {
         <div className="lg:col-span-1">
           <div className="rounded-lg bg-white p-6 shadow-md">
             <h2 className="mb-4 text-xl font-semibold">Add New Source</h2>
-            {/* We will create this form component next */}
             <SourceForm onSubmit={addSource} />
           </div>
         </div>
@@ -39,10 +37,9 @@ const Sources = () => {
             {isLoading ? (
               <Loader text="Loading sources..." />
             ) : (
-              /* We will create this list component next */
               <SourceList
                 sources={sources}
-                onUpdate={updateSource}
+                onUpdate={updateSource} // --- THIS PROP IS ADDED ---
                 onDelete={deleteSource}
               />
             )}

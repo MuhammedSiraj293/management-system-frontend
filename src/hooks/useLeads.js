@@ -21,13 +21,18 @@ export const useLeads = () => {
   
   // State to hold all query parameters
   const [filters, setFilters] = useState({
+    // Pagination
     page: 1,
     limit: 20,
+    // Sorting
     sort: 'createdAt',
     order: 'desc',
-    // We can add more filters here, e.g.:
-    // sourceId: null,
-    // status: null,
+    // --- NEW FILTERS ADDED ---
+    status: null,
+    sourceId: null,
+    dateRange: 'all',
+    dateFrom: null,
+    dateTo: null,
   });
 
   /**
@@ -39,7 +44,8 @@ export const useLeads = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Pass the current filters to the API
+      // Pass the current filters object to the API
+      // The API (which we'll update next) will read all properties
       const response = await leadApi.getLeads(filters);
       const { data, pagination: newPagination } = response.data;
       
@@ -51,7 +57,9 @@ export const useLeads = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [filters]); // Re-run this function *only* if filters change
+    // --- UPDATED DEPENDENCY ARRAY ---
+    // Re-run this function *only* if the filters object changes
+  }, [filters]); 
 
   // useEffect to trigger the fetch when the hook mounts
   // or when the 'fetchLeads' function (i.e., its dependencies) changes.
