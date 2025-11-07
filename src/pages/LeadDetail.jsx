@@ -6,7 +6,7 @@ import Alert from '../components/Common/Alert.jsx';
 import { formatDate } from '../utils/formatDate.js';
 import { leadApi } from '../api/leadApi.js';
 
-// Helper component for a single data field
+// --- (Helper component DetailItem is unchanged) ---
 const DetailItem = ({ label, value }) => (
   <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
     <dt className="text-sm font-medium text-gray-500">{label}</dt>
@@ -16,7 +16,7 @@ const DetailItem = ({ label, value }) => (
   </div>
 );
 
-// Helper component to format the Job History
+// --- (Helper component JobHistory is unchanged) ---
 const JobHistory = ({ jobs }) => (
   <ul className="divide-y divide-gray-200">
     {jobs.map((job) => (
@@ -40,7 +40,7 @@ const JobHistory = ({ jobs }) => (
   </ul>
 );
 
-// Helper component to format the Raw JSON payload
+// --- (Helper component RawPayload is unchanged) ---
 const RawPayload = ({ payload }) => (
   <pre className="mt-1 w-full overflow-auto rounded-md bg-gray-800 p-4 text-sm text-gray-200">
     {JSON.stringify(payload, null, 2)}
@@ -55,6 +55,7 @@ const LeadDetail = () => {
   const { lead, jobs, errors, isLoading, error, refresh } = useLeadDetail(leadId);
   const [isRetrying, setIsRetrying] = useState(false);
 
+  // --- (handleRetry function is unchanged) ---
   const handleRetry = async () => {
     if (!window.confirm("Are you sure you want to retry all failed jobs for this lead?")) {
       return;
@@ -84,7 +85,7 @@ const LeadDetail = () => {
 
   return (
     <div>
-      {/* --- Header --- */}
+      {/* --- Header (Updated to show new leadId) --- */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <Link
@@ -94,9 +95,14 @@ const LeadDetail = () => {
             &larr; Back to All Leads
           </Link>
           <h1 className="text-3xl font-bold text-gray-800">
-            {lead.name || 'Lead Details'}
+            {lead.name || 'Lead'}
+            {/* --- THIS IS THE UPDATE --- */}
+            <span className="ml-3 text-2xl font-medium text-gray-500">
+              (LEAD#{lead.leadId})
+            </span>
+            {/* --- END UPDATE --- */}
           </h1>
-          <p className="text-gray-500">Lead ID: {lead._id}</p>
+          <p className="text-gray-500">Internal ID: {lead._id}</p>
         </div>
         <button
           onClick={handleRetry}
@@ -126,6 +132,14 @@ const LeadDetail = () => {
                   lead.status === 'FAILED' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
                 }`}>{lead.status}</span>
               } />
+              
+              {/* --- NEW FIELDS ADDED --- */}
+              <DetailItem label="User Type" value={lead.userType} />
+              <DetailItem label="Property Type" value={lead.propertyType} />
+              <DetailItem label="Budget" value={lead.budget} />
+              <DetailItem label="Bedrooms" value={lead.bedrooms} />
+              {/* --- END NEW FIELDS --- */}
+
               <DetailItem label="Source" value={lead.sourceId?.name} />
               <DetailItem label="Platform" value={lead.source} />
               <DetailItem label="Form Name" value={lead.formName} />
