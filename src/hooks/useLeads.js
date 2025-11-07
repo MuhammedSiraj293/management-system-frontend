@@ -16,14 +16,12 @@ export const useLeads = () => {
     totalLeads: 0,
     totalPages: 1,
     currentPage: 1,
-    limit: 20,
   });
   
   // State to hold all query parameters
   const [filters, setFilters] = useState({
     // Pagination
     page: 1,
-    limit: 20,
     // Sorting
     sort: 'createdAt',
     order: 'desc',
