@@ -6,6 +6,7 @@ import LeadRow from './LeadRow.jsx';
 // --- Define all possible columns ---
 const ALL_COLUMNS = [
   { id: 'leadId', name: 'Lead ID' },
+  { id: 'date', name: 'Date' },
   { id: 'name', name: 'Name' },
   { id: 'contact', name: 'Contact' },
   { id: 'userType', name: 'User Type' },
@@ -15,7 +16,6 @@ const ALL_COLUMNS = [
   { id: 'source', name: 'Source' },
   { id: 'status', name: 'Status' },
   { id: 'utmSource', name: 'UTM Source' },
-  { id: 'date', name: 'Date' },
   { id: 'actions', name: 'Actions' },
 ];
 
