@@ -7,6 +7,7 @@ import Sources from './pages/Sources';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Bitrix from './pages/Bitrix';
+import LeadDetail from './pages/LeadDetail.jsx';
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: 'leads',
         element: <Leads />,
+      },
+      {
+        path: 'leads/:leadId', // This is the new detail page
+        element: <LeadDetail />,
       },
       {
         path: 'sources',
