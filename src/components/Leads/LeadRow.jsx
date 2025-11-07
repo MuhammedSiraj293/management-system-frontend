@@ -70,6 +70,13 @@ const LeadRow = ({ lead, isSelected, onSelect, visibleColumns }) => {
           </Link>
         </td>
       )}
+
+     {/* --- Date --- */}
+      {visibleColumns.date && (
+        <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
+          {formatDate(lead.createdAt)}
+        </td>
+      )}
       
       {/* --- Name (Now a link) --- */}
       {visibleColumns.name && (
@@ -137,12 +144,6 @@ const LeadRow = ({ lead, isSelected, onSelect, visibleColumns }) => {
         </td>
       )}
       
-      {/* --- Date --- */}
-      {visibleColumns.date && (
-        <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
-          {formatDate(lead.createdAt)}
-        </td>
-      )}
       
       {/* --- Actions --- */}
       {visibleColumns.actions && (
