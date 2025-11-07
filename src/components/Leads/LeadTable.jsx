@@ -23,6 +23,7 @@ const ALL_COLUMNS = [
 // (You can change these defaults)
 const DEFAULT_VISIBLE = {
   leadId: true,
+  date: true,
   name: true,
   contact: true,
   userType: false,
@@ -32,7 +33,6 @@ const DEFAULT_VISIBLE = {
   source: true,
   status: true,
   utmSource: false,
-  date: true,
   actions: true,
 };
 
