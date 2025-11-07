@@ -1,20 +1,21 @@
 import React from 'react';
-import LeadTable from '../components/Leads/LeadTable.jsx'; // Our new table
+import LeadTable from '../components/Leads/LeadTable.jsx'; // Our new, complex table
 import LeadFilterBar from '../components/Leads/LeadFilterBar.jsx';
 import { useLeads } from '../hooks/useLeads.js';
 import Loader from '../components/Common/Loader.jsx';
 import Alert from '../components/Common/Alert.jsx';
-// We no longer need the old Pagination component, as LeadTable has it built-in.
-// import Pagination from '../components/Common/Pagination.jsx';
 
 /**
  * The main "Leads" page.
- * This component now passes all props to the new LeadTable.
+ * This component now just fetches data and passes it
+ * to the FilterBar and LeadTable components.
  */
 const Leads = () => {
   const { leads, pagination, isLoading, error, setFilters } = useLeads();
 
+  // --- Handler for the Filter Bar ---
   const handleFilterChange = (newFilters) => {
+    // We reset to page 1 every time the filter changes
     setFilters((prevFilters) => ({
       ...prevFilters,
       ...newFilters,
@@ -22,6 +23,7 @@ const Leads = () => {
     }));
   };
 
+  // --- Handler for Page Changes (from pagination) ---
   const handlePageChange = (newPage) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -29,7 +31,7 @@ const Leads = () => {
     }));
   };
 
-  // --- ADDED: Handler for Records per page ---
+  // --- Handler for Records per Page (from table footer) ---
   const handleLimitChange = (newLimit) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -40,8 +42,13 @@ const Leads = () => {
 
   // --- Render logic ---
   const renderContent = () => {
+    // Show full-page loader only on the first load
     if (isLoading && !leads.length) {
-      return <Loader text="Loading leads..." />;
+      return (
+        <div className="flex h-64 items-center justify-center rounded-lg bg-white shadow-lg">
+          <Loader text="Loading leads..." />
+        </div>
+      );
     }
 
     if (error) {
@@ -49,11 +56,22 @@ const Leads = () => {
     }
 
     if (!isLoading && leads.length === 0) {
-      return <Alert type="warning" message="No leads found for these filters." />;
+      return (
+        <>
+          <Alert type="warning" message="No leads found for these filters." />
+          {/* We still show the table shell so it doesn't look broken */}
+          <LeadTable
+            leads={[]}
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            onLimitChange={handleLimitChange}
+          />
+        </>
+      );
     }
 
-    // --- THIS IS THE FIX ---
-    // We must pass all the required props to LeadTable.
+    // --- This is the main success state ---
+    // We pass all data and handlers to the table.
     return (
       <LeadTable
         leads={leads}
@@ -62,19 +80,16 @@ const Leads = () => {
         onLimitChange={handleLimitChange}
       />
     );
-    // --- We no longer need the old <Pagination /> component here ---
   };
 
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold text-gray-800">All Leads</h1>
 
+      {/* --- Filter Bar --- */}
       <LeadFilterBar onFilterChange={handleFilterChange} />
 
-      {/* The 'rounded-lg bg-white p-4 shadow-md' classes are now
-        MOVED INSIDE the LeadTable component, so we remove them from here
-        to prevent a "box-inside-a-box" look.
-      */}
+      {/* --- Main Content (Table, Loader, or Error) --- */}
       <div className="mt-6">
         {renderContent()}
       </div>
