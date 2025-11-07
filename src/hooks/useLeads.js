@@ -22,6 +22,7 @@ export const useLeads = () => {
   const [filters, setFilters] = useState({
     // Pagination
     page: 1,
+    limit: 10,
     // Sorting
     sort: 'createdAt',
     order: 'desc',
