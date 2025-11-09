@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { reportApi } from '../api/reportApi.js';
-// import logger from '../config/logger.js';
+// We don't need the logger here anymore
+// import logger from '../config/logger.js'; 
 
 /**
  * A custom hook to fetch and manage the state for the
- * main dashboard KPIs.
+ * main dashboard KPIs and charts.
  */
 export const useDashboard = () => {
   const [kpis, setKpis] = useState({
@@ -13,38 +14,50 @@ export const useDashboard = () => {
     failedJobs: 0,
     leadsBySource: [],
   });
+  // --- ADDED: State for chart data ---
+  const [chartData, setChartData] = useState([]);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   /**
-   * Fetches the dashboard KPI data from the API.
+   * Fetches all dashboard data (KPIs and Chart) in parallel.
    */
-  const fetchKpis = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await reportApi.getDashboardKpis();
-      setKpis(response.data.data);
+      // --- UPDATED: Fetch both endpoints at the same time ---
+      const [kpiResponse, chartResponse] = await Promise.all([
+        reportApi.getDashboardKpis(),
+        reportApi.getLeadsOverTime({ period: '28d' }) // Default to 28 days
+      ]);
+
+      setKpis(kpiResponse.data.data);
+      setChartData(chartResponse.data.data);
+      // --- END UPDATE ---
+
     } catch (err) {
       const message =
         err.response?.data?.message || 'Failed to fetch dashboard data.';
       setError(message);
-      logger.error('Error fetching dashboard KPIs:', message);
+      console.error('Error fetching dashboard data:', message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []); // Empty dependency array means this runs once
 
   // useEffect to trigger the fetch when the hook mounts
   useEffect(() => {
-    fetchKpis();
-  }, []); // Empty dependency array means this runs once on mount
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
-  // Return the state and a function to manually refresh
+  // Return all state and a refresh function
   return {
     kpis,
+    chartData, // --- ADDED ---
     isLoading,
     error,
-    refresh: fetchKpis, // Allow components to trigger a refresh
+    refresh: fetchDashboardData,
   };
 };

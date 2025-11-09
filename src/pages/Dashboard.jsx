@@ -1,10 +1,12 @@
 import React from 'react';
-import { useDashboard } from '../hooks/useDashboard.js'; // Import the new hook
+import { useDashboard } from '../hooks/useDashboard.js';
 import Loader from '../components/Common/Loader.jsx';
 import Alert from '../components/Common/Alert.jsx';
+import LeadChart from '../components/Dashboard/LeadChart.jsx'; // --- ADDED ---
 
 /**
  * A reusable KPI card component.
+ * (This component is unchanged)
  */
 const KpiCard = ({ title, value, bgColor = 'bg-blue-100', textColor = 'text-blue-900' }) => (
   <div className={`rounded-lg p-5 shadow ${bgColor}`}>
@@ -15,14 +17,18 @@ const KpiCard = ({ title, value, bgColor = 'bg-blue-100', textColor = 'text-blue
 
 /**
  * The main Dashboard page.
- * It now fetches and displays real data from the backend.
+ * It now fetches and displays both KPIs and the new chart.
  */
 const Dashboard = () => {
-  // --- Use the hook to get data ---
-  const { kpis, isLoading, error } = useDashboard();
+  // --- UPDATED: Get 'chartData' from the hook ---
+  const { kpis, chartData, isLoading, error } = useDashboard();
 
   if (isLoading) {
-    return <Loader text="Loading dashboard data..." />;
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader text="Loading dashboard data..." />
+      </div>
+    );
   }
 
   if (error) {
@@ -34,7 +40,7 @@ const Dashboard = () => {
     <div>
       <h1 className="mb-6 text-3xl font-bold text-gray-800">Dashboard</h1>
       
-      {/* KPI Cards Grid */}
+      {/* --- KPI Cards Grid (Unchanged) --- */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <KpiCard 
           title="Leads (Today)" 
@@ -56,7 +62,13 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Leads by Source Table */}
+      {/* --- ADDED: Lead Chart --- */}
+      <div className="mt-8">
+        <LeadChart chartData={chartData} />
+      </div>
+      {/* --- END ADDED --- */}
+
+      {/* --- Leads by Source Table (Unchanged) --- */}
       <div className="mt-8 rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-4 text-xl font-semibold">Leads by Source</h2>
         <div className="overflow-x-auto">
