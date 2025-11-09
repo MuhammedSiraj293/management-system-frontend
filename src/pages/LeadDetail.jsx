@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useLeadDetail } from '../hooks/useLeadDetail.js';
-import Loader from '../components/Common/Loader.jsx';
-import Alert from '../components/Common/Alert.jsx';
-import { formatDate } from '../utils/formatDate.js';
-import { leadApi } from '../api/leadApi.js';
+import React, { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useLeadDetail } from "../hooks/useLeadDetail.js";
+import Loader from "../components/Common/Loader.jsx";
+import Alert from "../components/Common/Alert.jsx";
+import { formatDate } from "../utils/formatDate.js";
+import { leadApi } from "../api/leadApi.js";
 
 // --- (Helper component DetailItem is unchanged) ---
 const DetailItem = ({ label, value }) => (
@@ -15,6 +15,21 @@ const DetailItem = ({ label, value }) => (
     </dd>
   </div>
 );
+// utils/statusColors.js
+export const getStatusColor = (status) => {
+  switch (status?.toUpperCase()) {
+    case 'SUCCESS':
+      return 'bg-green-100 text-green-800';
+    case 'FAILED':
+      return 'bg-red-100 text-red-800';
+    case 'PROCESSING':
+      return 'bg-blue-100 text-blue-800';
+    case 'QUEUED':
+      return 'bg-yellow-100 text-yellow-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
 
 // --- (Helper component JobHistory is unchanged) ---
 const JobHistory = ({ jobs }) => (
@@ -23,13 +38,23 @@ const JobHistory = ({ jobs }) => (
       <li key={job._id} className="py-3">
         <p className="text-sm font-medium text-gray-900">{job.type}</p>
         <p className="text-sm text-gray-500">
-          Status: <span className={`font-medium ${
-            job.status === 'COMPLETED' ? 'text-green-600' :
-            job.status === 'FAILED' ? 'text-red-600' : 'text-yellow-600'
-          }`}>{job.status}</span>
+          Status:{" "}
+          <span
+            className={`font-medium ${
+              job.status === "COMPLETED"
+                ? "text-green-600"
+                : job.status === "FAILED"
+                ? "text-red-600"
+                : "text-yellow-600"
+            }`}
+          >
+            {job.status}
+          </span>
         </p>
         <p className="text-sm text-gray-500">Attempts: {job.attempts}</p>
-        <p className="text-sm text-gray-500">Last Run: {formatDate(job.runAt)}</p>
+        <p className="text-sm text-gray-500">
+          Last Run: {formatDate(job.runAt)}
+        </p>
         {job.lastError && (
           <p className="mt-1 rounded bg-red-50 p-2 text-xs text-red-700">
             <strong>Error:</strong> {job.lastError}
@@ -39,6 +64,7 @@ const JobHistory = ({ jobs }) => (
     ))}
   </ul>
 );
+
 
 // --- (Helper component RawPayload is unchanged) ---
 const RawPayload = ({ payload }) => (
@@ -52,12 +78,17 @@ const RawPayload = ({ payload }) => (
  */
 const LeadDetail = () => {
   const { leadId } = useParams();
-  const { lead, jobs, errors, isLoading, error, refresh } = useLeadDetail(leadId);
+  const { lead, jobs, errors, isLoading, error, refresh } =
+    useLeadDetail(leadId);
   const [isRetrying, setIsRetrying] = useState(false);
 
   // --- (handleRetry function is unchanged) ---
   const handleRetry = async () => {
-    if (!window.confirm("Are you sure you want to retry all failed jobs for this lead?")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to retry all failed jobs for this lead?"
+      )
+    ) {
       return;
     }
     setIsRetrying(true);
@@ -95,7 +126,7 @@ const LeadDetail = () => {
             &larr; Back to All Leads
           </Link>
           <h1 className="text-3xl font-bold text-gray-800">
-            {lead.name || 'Lead'}
+            {lead.name || "Lead"}
             {/* --- THIS IS THE UPDATE --- */}
             <span className="ml-3 text-2xl font-medium text-gray-500">
               (LEAD#{lead.leadId})
@@ -106,10 +137,10 @@ const LeadDetail = () => {
         </div>
         <button
           onClick={handleRetry}
-          disabled={isRetrying || lead.status !== 'failed'}
+          disabled={isRetrying || lead.status !== "failed"}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-400"
         >
-          {isRetrying ? 'Retrying...' : 'Retry Failed Jobs'}
+          {isRetrying ? "Retrying..." : "Retry Failed Jobs"}
         </button>
       </div>
 
@@ -126,13 +157,19 @@ const LeadDetail = () => {
               <DetailItem label="Name" value={lead.name} />
               <DetailItem label="Phone" value={lead.phone} />
               <DetailItem label="Email" value={lead.email} />
-              <DetailItem label="Status" value={
-                <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                  lead.status === 'SUCCESS' ? 'bg-green-100 text-green-800' :
-                  lead.status === 'FAILED' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                }`}>{lead.status}</span>
-              } />
-              
+              <DetailItem
+                label="Status"
+                value={
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${getStatusColor(
+                      lead.status
+                    )}`}
+                  >
+                    {lead.status?.toUpperCase()}
+                  </span>
+                }
+              />
+
               {/* --- NEW FIELDS ADDED --- */}
               <DetailItem label="User Type" value={lead.userType} />
               <DetailItem label="Property Type" value={lead.propertyType} />
@@ -144,7 +181,10 @@ const LeadDetail = () => {
               <DetailItem label="Platform" value={lead.source} />
               <DetailItem label="Form Name" value={lead.formName} />
               <DetailItem label="Campaign" value={lead.campaignName} />
-              <DetailItem label="Received (UAE)" value={formatDate(lead.timestampUae)} />
+              <DetailItem
+                label="Received (UAE)"
+                value={formatDate(lead.timestampUae)}
+              />
             </dl>
           </div>
         </div>
@@ -158,7 +198,11 @@ const LeadDetail = () => {
               </h3>
             </div>
             <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-              {jobs.length > 0 ? <JobHistory jobs={jobs} /> : <p className="text-sm text-gray-500">No jobs found.</p>}
+              {jobs.length > 0 ? (
+                <JobHistory jobs={jobs} />
+              ) : (
+                <p className="text-sm text-gray-500">No jobs found.</p>
+              )}
             </div>
           </div>
 
